@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # 创建任务循环,每一个小时去爬取
     scheduler = APScheduler()
     scheduler.init_app(app)
-    scheduler.add_job(func=add_data, id='1', args=(), trigger='interval', seconds=1 * 60, replace_existing=True)
+    scheduler.add_job(func=add_data, id='1', args=(), trigger='interval', seconds=1 * 60 * 60, replace_existing=True)
     scheduler.start()
 
     # 运行
