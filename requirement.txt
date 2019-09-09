@@ -1,0 +1,6 @@
+Flask
+SQLAlchemy
+Flask_APScheduler
+Flask_SQLAlchemy
+bs4
+Flask_pymysql
