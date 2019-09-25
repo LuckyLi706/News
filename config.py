@@ -2,7 +2,7 @@
 # 服务器配置
 DEBUG = True
 PORT = 9082
-IP = '127.0.0.1'
+IP = '192.168.1.107'
 
 # 数据库配置
 DB_USERNAME = 'root'

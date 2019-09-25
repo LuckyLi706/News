@@ -12,7 +12,9 @@
 2. python app.py
 ## 主要接口
 ### 查询数据接口
-http://127.0.0.1:9080/query?lasttime=1568085420
++ 本地地址：http://127.0.0.1:9080/query/top?lasttime=1568085420
++ 线上测试地址：http://49.235.83.194:9082/query/top
++ query后跟top为今日的头条新闻，跟world表示今日世界新闻
 + lasttime参数非必须参数,不带会返回最新的10条数据
 + lasttime携带表示返回这个时间点之后的数据,用于做数据更新,每次请求都会返回一个lasttime,
 每次请求最多返回10条数据。
@@ -83,3 +85,7 @@ http://127.0.0.1:9080/query?lasttime=1568085420
 http://127.0.0.1:9080/register?username=lijie&password=1234
 ### 登录接口(支持get和post接口)
 http://127.0.0.1:9080/login?username=lijie&password=1234
+
+## 更新内容
++ 增加世界新闻地址（19/9/1）
++ 增加新闻头条接口（19/9/25）

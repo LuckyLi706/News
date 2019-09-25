@@ -1,5 +1,3 @@
-import time
-
 from flask import Flask, request
 from flask_apscheduler import APScheduler
 from flask_sqlalchemy import SQLAlchemy
@@ -21,9 +19,22 @@ Base = declarative_base()
 db = SQLAlchemy(app)
 
 
-# 创建新闻内容表
-class NewsContent(Base):
-    __tablename__ = "content"
+# 创建头条新闻表
+class NewsTop(Base):
+    __tablename__ = "top"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    url = db.Column(db.String(100), nullable=False)  # 文章详细内容链接
+    title = db.Column(db.String(100), nullable=False)  # 标题
+    content = db.Column(db.Text, nullable=False)  # 内容
+    time = db.Column(db.Text, nullable=False)  # 时间,用于进行比较的
+    formattime = db.Column(db.Text, nullable=False)  # 格式化的时间
+    origin = db.Column(db.Text, nullable=False)  # 来源
+    pic = db.Column(db.Text, nullable=False)  # 图片地址
+
+
+# 创建国际新闻表
+class NewsWorld(Base):
+    __tablename__ = "world"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     url = db.Column(db.String(100), nullable=False)  # 文章详细内容链接
     title = db.Column(db.String(100), nullable=False)  # 标题
@@ -47,28 +58,60 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-# 需要执行的循环任务
-def add_data():
+# 向数据库添加国际新闻数据
+def add_world_data():
     splder = Spider()
-    new_list = splder.go()
-    ret = session.query(NewsContent).order_by(NewsContent.id.desc()).first()  # 查询时间最大的那条数据
+    new_list = splder.go('world')
+    ret = session.query(NewsWorld).order_by(NewsWorld.id.desc()).first()  # 查询时间最大的那条数据
     for new in new_list:
         if ret is not None and int(ret.time) >= new.time:
             continue
         else:
-            article = NewsContent(url=new.url, title=new.title, content=new.content, time=new.time,
+            article = NewsWorld(url=new.url, title=new.title, content=new.content, time=new.time,
+                                origin=new.origin, pic=new.pic, formattime=new.formattime)
+            session.add(article)
+            session.commit()
+
+
+# 向数据库添加头条新闻数据
+def add_top_data():
+    splder = Spider()
+    new_list = splder.go('top')
+    ret = session.query(NewsTop).order_by(NewsTop.id.desc()).first()  # 查询时间最大的那条数据
+    for new in new_list:
+        if ret is not None and int(ret.time) >= new.time:
+            continue
+        else:
+            article = NewsTop(url=new.url, title=new.title, content=new.content, time=new.time,
                               origin=new.origin, pic=new.pic, formattime=new.formattime)
             session.add(article)
             session.commit()
 
 
-@app.route('/query', methods=['GET', 'POST'])
-def query():
-    lasttime = 0 if request.args.get('lasttime') is None else request.args.get('lasttime')
-    retmax = session.query(NewsContent).order_by(NewsContent.id.desc()).first()  # 查询时间最大的那条数据
-    ret = session.query(NewsContent).order_by(NewsContent.id.desc()).limit(10)
+# 需要执行的循环任务
+def add_data():
+    add_top_data()
+    add_world_data()
+
+
+@app.route('/query/<string:type>', methods=['GET', 'POST'])
+def query(type):
+    if type == 'top':
+        lasttime = 0 if request.args.get('lasttime') is None else request.args.get('lasttime')
+        retmax = session.query(NewsTop).order_by(NewsTop.id.desc()).first()  # 查询时间最大的那条数据
+        ret = session.query(NewsTop).order_by(NewsTop.id.desc()).limit(10)
+    else:
+        if type == 'world':
+            lasttime = 0 if request.args.get('lasttime') is None else request.args.get('lasttime')
+            retmax = session.query(NewsWorld).order_by(NewsWorld.id.desc()).first()  # 查询时间最大的那条数据
+            ret = session.query(NewsWorld).order_by(NewsWorld.id.desc()).limit(10)
+        else:
+            return "访问路径错误"
+
     list = []
     jsonreturn = {}
+    if retmax is None:
+        return jsonreturn
     jsonreturn["lasttime"] = retmax.time
     for i in range(10):
         json = {}

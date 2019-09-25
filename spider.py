@@ -5,11 +5,11 @@ import time
 
 
 class Spider:
-    url = "http://www.mnw.cn/news/world/"
+    baseurl = "http://www.mnw.cn/news/"
 
     # 获取html的内容
-    def __gethtml(self):
-        r = request.urlopen(Spider.url)  # 向这个地址发送http请求
+    def __gethtml(self, type):
+        r = request.urlopen(Spider.baseurl + type)  # 向这个地址发送http请求
         htmls = r.read()  # 读取获取的html内容
         htmls = str(htmls, encoding='utf-8')  # 使用utf-8进行编码
         return htmls
@@ -48,6 +48,6 @@ class Spider:
         return news_list
 
     # 向外暴露的接口
-    def go(self):
-        htmls = self.__gethtml()
+    def go(self, type):
+        htmls = self.__gethtml(type)
         return self.__analysis(htmls)
